@@ -232,7 +232,11 @@ function connectElgatoStreamDeckSocket(inPort, inPluginUUID, inRegisterEvent, in
   });
 
   websocket.on('message', (message) => {
-    handleMessage(message);
+    try {
+      handleMessage(message);
+    } catch (error) {
+      console.error('Error handling message:', error);
+    }
   });
 
   websocket.on('error', (error) => {
@@ -253,9 +257,11 @@ const args = process.argv.slice(2);
 const params = {};
 
 for (let i = 0; i < args.length; i += 2) {
-  const key = args[i].replace('-', '');
-  const value = args[i + 1];
-  params[key] = value;
+  if (i + 1 < args.length) {
+    const key = args[i].replace(/^-+/, '');
+    const value = args[i + 1];
+    params[key] = value;
+  }
 }
 
 // Connect to Stream Deck
