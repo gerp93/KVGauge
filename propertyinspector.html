@@ -119,7 +119,13 @@
 
     function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
       uuid = inUUID;
-      actionInfo = JSON.parse(inActionInfo);
+      
+      try {
+        actionInfo = JSON.parse(inActionInfo);
+      } catch (error) {
+        console.error('Failed to parse action info:', error);
+        actionInfo = {};
+      }
       
       websocket = new WebSocket('ws://127.0.0.1:' + inPort);
 
@@ -135,13 +141,17 @@
       };
 
       websocket.onmessage = function(evt) {
-        const jsonObj = JSON.parse(evt.data);
-        const event = jsonObj.event;
-        const jsonPayload = jsonObj.payload;
+        try {
+          const jsonObj = JSON.parse(evt.data);
+          const event = jsonObj.event;
+          const jsonPayload = jsonObj.payload;
 
-        if (event === 'didReceiveSettings') {
-          const settings = jsonPayload.settings;
-          loadSettings(settings);
+          if (event === 'didReceiveSettings') {
+            const settings = jsonPayload.settings;
+            loadSettings(settings);
+          }
+        } catch (error) {
+          console.error('Failed to parse message:', error);
         }
       };
     }

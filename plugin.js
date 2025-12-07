@@ -154,7 +154,14 @@ function stopUpdates(context) {
  * Handle incoming messages from Stream Deck
  */
 function handleMessage(message) {
-  const jsonObj = JSON.parse(message);
+  let jsonObj;
+  try {
+    jsonObj = JSON.parse(message);
+  } catch (error) {
+    console.error('Failed to parse message:', error);
+    return;
+  }
+
   const event = jsonObj.event;
   const context = jsonObj.context;
   const action = jsonObj.action;
