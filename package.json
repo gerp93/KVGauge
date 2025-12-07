@@ -15,7 +15,7 @@
     "system"
   ],
   "author": "gerp93",
-  "license": "GPL-3.0",
+  "license": "AGPL-3.0",
   "dependencies": {
     "systeminformation": "^5.23.7",
     "ws": "^8.18.0"

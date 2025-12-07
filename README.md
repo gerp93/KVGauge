@@ -62,7 +62,7 @@ Monitor your CPU usage, temperature, and clock speed directly on your Stream Dec
 
 ## License
 
-GPL-3.0
+AGPL-3.0
 
 ## Author
 

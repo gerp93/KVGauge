@@ -241,7 +241,7 @@ function connectElgatoStreamDeckSocket(inPort, inPluginUUID, inRegisterEvent, in
 
   websocket.on('message', (message) => {
     try {
-      handleMessage(message);
+      handleMessage(message.toString());
     } catch (error) {
       console.error('Error handling message:', error);
     }
