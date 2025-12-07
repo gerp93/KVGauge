@@ -120,10 +120,15 @@
     function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
       uuid = inUUID;
       
-      try {
-        actionInfo = JSON.parse(inActionInfo);
-      } catch (error) {
-        console.error('Failed to parse action info:', error);
+      // Parse action info if provided
+      if (inActionInfo) {
+        try {
+          actionInfo = JSON.parse(inActionInfo);
+        } catch (error) {
+          console.error('Failed to parse action info:', error);
+          actionInfo = {};
+        }
+      } else {
         actionInfo = {};
       }
       

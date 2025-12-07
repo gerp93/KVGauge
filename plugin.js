@@ -6,6 +6,7 @@
  */
 
 const si = require('systeminformation');
+const WebSocket = require('ws');
 
 // WebSocket connection to Stream Deck
 let websocket = null;
@@ -225,7 +226,7 @@ function connectElgatoStreamDeckSocket(inPort, inPluginUUID, inRegisterEvent, in
   pluginUUID = inPluginUUID;
 
   // Create WebSocket connection
-  websocket = new (require('ws'))(`ws://127.0.0.1:${inPort}`);
+  websocket = new WebSocket(`ws://127.0.0.1:${inPort}`);
 
   websocket.on('open', () => {
     console.log('Connected to Stream Deck');
