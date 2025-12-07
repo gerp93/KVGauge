@@ -1,0 +1,268 @@
+#!/usr/bin/env node
+
+/**
+ * KV Gauge - Stream Deck CPU Monitoring Plugin
+ * Monitors CPU usage, temperature, and clock speed
+ */
+
+const si = require('systeminformation');
+
+// WebSocket connection to Stream Deck
+let websocket = null;
+let pluginUUID = null;
+
+// Store active contexts and their settings
+const contexts = {};
+
+// Update intervals for each metric type
+const updateIntervals = {};
+
+// Action UUIDs
+const ACTIONS = {
+  CPU_USAGE: 'com.gerp93.kvgauge.cpuusage',
+  CPU_TEMP: 'com.gerp93.kvgauge.cputemp',
+  CPU_CLOCK: 'com.gerp93.kvgauge.cpuclock'
+};
+
+/**
+ * Get CPU usage percentage
+ */
+async function getCPUUsage() {
+  try {
+    const load = await si.currentLoad();
+    return Math.round(load.currentLoad);
+  } catch (error) {
+    console.error('Error getting CPU usage:', error);
+    return null;
+  }
+}
+
+/**
+ * Get CPU temperature
+ */
+async function getCPUTemperature() {
+  try {
+    const temp = await si.cpuTemperature();
+    if (temp.main && temp.main > 0) {
+      return Math.round(temp.main);
+    }
+    return null;
+  } catch (error) {
+    console.error('Error getting CPU temperature:', error);
+    return null;
+  }
+}
+
+/**
+ * Get CPU clock speed
+ */
+async function getCPUClock() {
+  try {
+    const cpuData = await si.cpu();
+    if (cpuData.speed) {
+      return cpuData.speed.toFixed(2);
+    }
+    return null;
+  } catch (error) {
+    console.error('Error getting CPU clock:', error);
+    return null;
+  }
+}
+
+/**
+ * Update the display for a specific context
+ */
+async function updateDisplay(context, action) {
+  if (!websocket || !contexts[context]) {
+    return;
+  }
+
+  let value = null;
+  let title = '';
+
+  switch (action) {
+    case ACTIONS.CPU_USAGE:
+      value = await getCPUUsage();
+      if (value !== null) {
+        title = `${value}%`;
+      }
+      break;
+
+    case ACTIONS.CPU_TEMP:
+      value = await getCPUTemperature();
+      if (value !== null) {
+        title = `${value}°C`;
+      } else {
+        title = 'N/A';
+      }
+      break;
+
+    case ACTIONS.CPU_CLOCK:
+      value = await getCPUClock();
+      if (value !== null) {
+        title = `${value} GHz`;
+      }
+      break;
+  }
+
+  // Send title update to Stream Deck
+  if (title) {
+    const payload = {
+      event: 'setTitle',
+      context: context,
+      payload: {
+        title: title,
+        target: 0
+      }
+    };
+    websocket.send(JSON.stringify(payload));
+  }
+}
+
+/**
+ * Start periodic updates for a context
+ */
+function startUpdates(context, action) {
+  // Clear any existing interval
+  if (updateIntervals[context]) {
+    clearInterval(updateIntervals[context]);
+  }
+
+  // Update immediately
+  updateDisplay(context, action);
+
+  // Set up periodic updates (every 2 seconds)
+  updateIntervals[context] = setInterval(() => {
+    updateDisplay(context, action);
+  }, 2000);
+}
+
+/**
+ * Stop updates for a context
+ */
+function stopUpdates(context) {
+  if (updateIntervals[context]) {
+    clearInterval(updateIntervals[context]);
+    delete updateIntervals[context];
+  }
+}
+
+/**
+ * Handle incoming messages from Stream Deck
+ */
+function handleMessage(message) {
+  const jsonObj = JSON.parse(message);
+  const event = jsonObj.event;
+  const context = jsonObj.context;
+  const action = jsonObj.action;
+
+  console.log(`Received event: ${event}`);
+
+  switch (event) {
+    case 'keyDown':
+      // Key pressed - could trigger refresh or other actions
+      if (contexts[context]) {
+        updateDisplay(context, action);
+      }
+      break;
+
+    case 'keyUp':
+      // Key released - no action needed for monitoring
+      break;
+
+    case 'willAppear':
+      // Action appeared on Stream Deck
+      contexts[context] = {
+        action: action,
+        settings: jsonObj.payload?.settings || {}
+      };
+      startUpdates(context, action);
+      break;
+
+    case 'willDisappear':
+      // Action removed from Stream Deck
+      stopUpdates(context);
+      delete contexts[context];
+      break;
+
+    case 'didReceiveSettings':
+      // Settings updated
+      if (contexts[context]) {
+        contexts[context].settings = jsonObj.payload?.settings || {};
+      }
+      break;
+
+    case 'propertyInspectorDidAppear':
+      // Property inspector opened
+      break;
+
+    case 'propertyInspectorDidDisappear':
+      // Property inspector closed
+      break;
+
+    case 'sendToPlugin':
+      // Message from property inspector
+      break;
+  }
+}
+
+/**
+ * Connect to Stream Deck
+ */
+function connectElgatoStreamDeckSocket(inPort, inPluginUUID, inRegisterEvent, inInfo) {
+  pluginUUID = inPluginUUID;
+
+  // Create WebSocket connection
+  websocket = new (require('ws'))(`ws://127.0.0.1:${inPort}`);
+
+  websocket.on('open', () => {
+    console.log('Connected to Stream Deck');
+
+    // Register plugin
+    const json = {
+      event: inRegisterEvent,
+      uuid: inPluginUUID
+    };
+    websocket.send(JSON.stringify(json));
+  });
+
+  websocket.on('message', (message) => {
+    handleMessage(message);
+  });
+
+  websocket.on('error', (error) => {
+    console.error('WebSocket error:', error);
+  });
+
+  websocket.on('close', () => {
+    console.log('Disconnected from Stream Deck');
+    // Clean up all intervals
+    Object.keys(updateIntervals).forEach(context => {
+      stopUpdates(context);
+    });
+  });
+}
+
+// Parse command line arguments
+const args = process.argv.slice(2);
+const params = {};
+
+for (let i = 0; i < args.length; i += 2) {
+  const key = args[i].replace('-', '');
+  const value = args[i + 1];
+  params[key] = value;
+}
+
+// Connect to Stream Deck
+if (params.port && params.pluginUUID && params.registerEvent && params.info) {
+  connectElgatoStreamDeckSocket(
+    params.port,
+    params.pluginUUID,
+    params.registerEvent,
+    params.info
+  );
+} else {
+  console.error('Missing required parameters');
+  console.log('This plugin must be launched by Stream Deck software');
+  process.exit(1);
+}

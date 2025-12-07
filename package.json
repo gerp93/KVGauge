@@ -1,0 +1,22 @@
+{
+  "name": "kvgauge",
+  "version": "1.0.0",
+  "description": "Stream Deck Computer Component Stat Monitor",
+  "main": "plugin.js",
+  "scripts": {
+    "start": "node plugin.js",
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "keywords": [
+    "streamdeck",
+    "plugin",
+    "cpu",
+    "monitoring",
+    "system"
+  ],
+  "author": "gerp93",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "systeminformation": "^5.23.7"
+  }
+}
