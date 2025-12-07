@@ -131,10 +131,13 @@ function startUpdates(context, action) {
   // Update immediately
   updateDisplay(context, action);
 
-  // Set up periodic updates (every 2 seconds)
+  // Get update interval from settings, default to 2 seconds
+  const updateInterval = contexts[context]?.settings?.updateInterval || 2000;
+
+  // Set up periodic updates
   updateIntervals[context] = setInterval(() => {
     updateDisplay(context, action);
-  }, 2000);
+  }, updateInterval);
 }
 
 /**
@@ -189,6 +192,8 @@ function handleMessage(message) {
       // Settings updated
       if (contexts[context]) {
         contexts[context].settings = jsonObj.payload?.settings || {};
+        // Restart updates with new interval
+        startUpdates(context, action);
       }
       break;
 
