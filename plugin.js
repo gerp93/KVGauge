@@ -61,7 +61,7 @@ async function getCPUClock() {
   try {
     const cpuData = await si.cpu();
     if (cpuData.speed) {
-      return cpuData.speed.toFixed(2);
+      return Number(cpuData.speed.toFixed(2));
     }
     return null;
   } catch (error) {
@@ -127,6 +127,7 @@ function startUpdates(context, action) {
   // Clear any existing interval
   if (updateIntervals[context]) {
     clearInterval(updateIntervals[context]);
+    delete updateIntervals[context];
   }
 
   // Update immediately
@@ -241,7 +242,9 @@ function connectElgatoStreamDeckSocket(inPort, inPluginUUID, inRegisterEvent, in
 
   websocket.on('message', (message) => {
     try {
-      handleMessage(message.toString());
+      // Convert Buffer to string if needed
+      const messageStr = typeof message === 'string' ? message : message.toString();
+      handleMessage(messageStr);
     } catch (error) {
       console.error('Error handling message:', error);
     }
