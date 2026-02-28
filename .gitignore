@@ -1,5 +1,6 @@
 # Node modules
 node_modules/
+com.gerp93.kvgauge.sdPlugin/node_modules/
 
 # Logs
 *.log
