@@ -73,7 +73,7 @@ async function getCPUClock() {
     }
     // Fall back to base speed if current speed is unavailable
     const cpuData = await si.cpu();
-    if (cpuData.speed) {
+    if (cpuData.speed != null) {
       return Number(cpuData.speed.toFixed(2));
     }
     return null;
@@ -97,9 +97,7 @@ async function updateDisplay(context, action) {
   switch (action) {
     case ACTIONS.CPU_USAGE:
       value = await getCPUUsage();
-      if (value !== null) {
-        title = `${value}%`;
-      }
+      title = value !== null ? `${value}%` : '--';
       break;
 
     case ACTIONS.CPU_TEMP:
@@ -113,9 +111,7 @@ async function updateDisplay(context, action) {
 
     case ACTIONS.CPU_CLOCK:
       value = await getCPUClock();
-      if (value !== null) {
-        title = `${value} GHz`;
-      }
+      title = value !== null ? `${value} GHz` : '--';
       break;
   }
 
