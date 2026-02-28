@@ -1,0 +1,76 @@
+{
+  "Name": "KV Gauge",
+  "Version": "1.0.0",
+  "Author": "gerp93",
+  "Description": "Monitor CPU usage, temperature, and other system metrics on your Stream Deck",
+  "Category": "System Monitoring",
+  "CategoryIcon": "Images/category",
+  "Icon": "Images/plugin",
+  "CodePath": "plugin.js",
+  "PropertyInspectorPath": "propertyinspector.html",
+  "DefaultWindowSize": [500, 650],
+  "OS": [
+    {
+      "Platform": "windows",
+      "MinimumVersion": "10"
+    },
+    {
+      "Platform": "mac",
+      "MinimumVersion": "10.14"
+    }
+  ],
+  "Software": {
+    "MinimumVersion": "5.0"
+  },
+  "SDKVersion": 2,
+  "Actions": [
+    {
+      "Name": "CPU Usage",
+      "UUID": "com.gerp93.kvgauge.cpuusage",
+      "Icon": "Images/actions/cpuusage",
+      "Tooltip": "Display CPU usage percentage",
+      "States": [
+        {
+          "Image": "Images/actions/cpuusage",
+          "TitleAlignment": "middle",
+          "FontSize": "16"
+        }
+      ],
+      "PropertyInspectorPath": "propertyinspector.html",
+      "SupportedInMultiActions": true,
+      "Controllers": ["Keypad"]
+    },
+    {
+      "Name": "CPU Temperature",
+      "UUID": "com.gerp93.kvgauge.cputemp",
+      "Icon": "Images/actions/cputemp",
+      "Tooltip": "Display CPU temperature",
+      "States": [
+        {
+          "Image": "Images/actions/cputemp",
+          "TitleAlignment": "middle",
+          "FontSize": "16"
+        }
+      ],
+      "PropertyInspectorPath": "propertyinspector.html",
+      "SupportedInMultiActions": true,
+      "Controllers": ["Keypad"]
+    },
+    {
+      "Name": "CPU Clock Speed",
+      "UUID": "com.gerp93.kvgauge.cpuclock",
+      "Icon": "Images/actions/cpuclock",
+      "Tooltip": "Display CPU clock speed",
+      "States": [
+        {
+          "Image": "Images/actions/cpuclock",
+          "TitleAlignment": "middle",
+          "FontSize": "16"
+        }
+      ],
+      "PropertyInspectorPath": "propertyinspector.html",
+      "SupportedInMultiActions": true,
+      "Controllers": ["Keypad"]
+    }
+  ]
+}

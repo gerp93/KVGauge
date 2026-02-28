@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>KV Gauge Settings</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      font-size: 14px;
+      color: #d8d8d8;
+      background-color: #2d2d2d;
+    }
+
+    .sdpi-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .sdpi-item {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .sdpi-item-label {
+      font-weight: 500;
+      color: #969696;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .sdpi-item-value {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    select, input {
+      padding: 8px 12px;
+      background-color: #3a3a3a;
+      color: #d8d8d8;
+      border: 1px solid #4a4a4a;
+      border-radius: 4px;
+      font-size: 13px;
+      outline: none;
+    }
+
+    select:hover, input:hover {
+      background-color: #424242;
+    }
+
+    select:focus, input:focus {
+      border-color: #0e7cff;
+    }
+
+    .info {
+      padding: 12px;
+      background-color: #3a3a3a;
+      border-radius: 4px;
+      font-size: 12px;
+      line-height: 1.6;
+      color: #969696;
+    }
+
+    .info strong {
+      color: #d8d8d8;
+    }
+
+    h3 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      font-weight: 500;
+      color: #d8d8d8;
+    }
+  </style>
+</head>
+<body>
+  <div class="sdpi-wrapper">
+    <div class="sdpi-item">
+      <div class="sdpi-item-label">Update Interval</div>
+      <div class="sdpi-item-value">
+        <select id="updateInterval">
+          <option value="1000">1 second</option>
+          <option value="2000" selected>2 seconds</option>
+          <option value="5000">5 seconds</option>
+          <option value="10000">10 seconds</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="info">
+      <h3>About This Action</h3>
+      <p>
+        <strong>CPU Monitoring:</strong> This plugin monitors your CPU metrics in real-time.
+      </p>
+      <ul style="margin: 8px 0; padding-left: 20px;">
+        <li><strong>CPU Usage:</strong> Shows current CPU utilization percentage</li>
+        <li><strong>CPU Temperature:</strong> Shows current CPU temperature (if available)</li>
+        <li><strong>CPU Clock:</strong> Shows current CPU clock speed in GHz</li>
+      </ul>
+      <p style="margin-top: 12px;">
+        <strong>Note:</strong> Temperature readings may not be available on all systems or may require administrator privileges.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // Load Stream Deck SDK
+    let websocket = null;
+    let uuid = null;
+    let actionInfo = {};
+
+    function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
+      uuid = inUUID;
+      
+      // Parse action info if provided
+      if (inActionInfo) {
+        try {
+          actionInfo = JSON.parse(inActionInfo);
+        } catch (error) {
+          console.error('Failed to parse action info:', error);
+          actionInfo = {};
+        }
+      } else {
+        actionInfo = {};
+      }
+      
+      websocket = new WebSocket('ws://127.0.0.1:' + inPort);
+
+      websocket.onopen = function() {
+        const json = {
+          event: inRegisterEvent,
+          uuid: inUUID
+        };
+        websocket.send(JSON.stringify(json));
+
+        // Load current settings
+        requestSettings();
+      };
+
+      websocket.onmessage = function(evt) {
+        try {
+          const jsonObj = JSON.parse(evt.data);
+          const event = jsonObj.event;
+          const jsonPayload = jsonObj.payload;
+
+          if (event === 'didReceiveSettings') {
+            const settings = jsonPayload.settings;
+            loadSettings(settings);
+          }
+        } catch (error) {
+          console.error('Failed to parse message:', error);
+        }
+      };
+    }
+
+    function requestSettings() {
+      if (websocket) {
+        const json = {
+          event: 'getSettings',
+          context: uuid
+        };
+        websocket.send(JSON.stringify(json));
+      }
+    }
+
+    function loadSettings(settings) {
+      if (settings.updateInterval) {
+        document.getElementById('updateInterval').value = settings.updateInterval;
+      }
+    }
+
+    function saveSettings() {
+      const settings = {
+        updateInterval: document.getElementById('updateInterval').value
+      };
+
+      if (websocket) {
+        const json = {
+          event: 'setSettings',
+          context: uuid,
+          payload: settings
+        };
+        websocket.send(JSON.stringify(json));
+      }
+    }
+
+    // Add event listeners
+    document.getElementById('updateInterval').addEventListener('change', saveSettings);
+  </script>
+</body>
+</html>
