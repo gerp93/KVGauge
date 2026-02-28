@@ -6,7 +6,7 @@
   "Category": "System Monitoring",
   "CategoryIcon": "Images/category",
   "Icon": "Images/plugin",
-  "CodePath": "plugin.js",
+  "CodePath": "index.html",
   "PropertyInspectorPath": "propertyinspector.html",
   "DefaultWindowSize": [500, 650],
   "OS": [

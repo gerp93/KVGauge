@@ -9,7 +9,6 @@
 ### Installing the Plugin
 
 1. **Download the Plugin**
-   - Clone or download this repository
    ```bash
    git clone https://github.com/gerp93/KVGauge.git
    cd KVGauge
@@ -17,20 +16,23 @@
 
 2. **Install Dependencies**
    ```bash
+   cd com.gerp93.kvgauge.sdPlugin
    npm install
+   cd ..
    ```
 
 3. **Locate Your Stream Deck Plugins Folder**
    - **Windows**: `%appdata%\Elgato\StreamDeck\Plugins\`
    - **macOS**: `~/Library/Application Support/com.elgato.StreamDeck/Plugins/`
 
-4. **Create Plugin Directory**
-   - Create a folder named `com.gerp93.kvgauge.sdPlugin` in the plugins directory
-   - Copy all files from this repository into that folder
+4. **Copy the Plugin Bundle**
+   Copy the entire `com.gerp93.kvgauge.sdPlugin` folder (including `node_modules/`) into the plugins directory.
+   The folder name **must** be `com.gerp93.kvgauge.sdPlugin` (case-sensitive).
 
-5. **Restart Stream Deck Software**
-   - Quit and reopen the Stream Deck software
-   - The plugin should now appear in the actions list
+5. **Reload Stream Deck**
+   - Quit Stream Deck completely (system tray on Windows / menu bar on macOS).
+   - Relaunch Stream Deck.
+   - The **KV Gauge** category should appear in the actions list.
 
 ## For Developers
 
@@ -38,19 +40,18 @@
 ```
 com.gerp93.kvgauge.sdPlugin/
 ├── manifest.json              # Plugin configuration and metadata
+├── index.html                 # Stream Deck entry point (CodePath wrapper)
 ├── plugin.js                  # Main plugin code (Node.js)
 ├── propertyinspector.html     # Settings UI
 ├── package.json               # Node.js dependencies
 ├── package-lock.json          # Dependency lock file
-├── .gitignore                 # Git ignore rules
-├── Images/
-│   ├── plugin.png            # Plugin icon
-│   ├── category.png          # Category icon
-│   └── actions/
-│       ├── cpuusage.png      # CPU Usage action icon
-│       ├── cputemp.png       # CPU Temperature action icon
-│       └── cpuclock.png      # CPU Clock action icon
-└── README.md                 # Documentation
+└── Images/
+    ├── plugin.png             # Plugin icon
+    ├── category.png           # Category icon
+    └── actions/
+        ├── cpuusage.png       # CPU Usage action icon
+        ├── cputemp.png        # CPU Temperature action icon
+        └── cpuclock.png       # CPU Clock action icon
 ```
 
 ### Building from Source
@@ -63,74 +64,65 @@ com.gerp93.kvgauge.sdPlugin/
 
 2. **Install dependencies**
    ```bash
+   cd com.gerp93.kvgauge.sdPlugin
    npm install
    ```
 
-3. **Test the plugin locally**
+3. **Test the plugin logic locally (Node.js CLI)**
    ```bash
    node plugin.js -port 12345 -pluginUUID test -registerEvent test -info "{}"
    ```
 
-### Creating a Distribution Package
+### Creating a Distribution Package (`.streamDeckPlugin`)
 
-To distribute the plugin:
-
-1. Create a folder named `com.gerp93.kvgauge.sdPlugin`
-2. Copy all necessary files:
-   - manifest.json
-   - plugin.js
-   - propertyinspector.html
-   - package.json
-   - package-lock.json
-   - node_modules/ (after running npm install)
-   - Images/ (all icons)
-3. Compress the folder as a ZIP file
-4. Rename the extension from `.zip` to `.streamDeckPlugin`
-5. Double-click the `.streamDeckPlugin` file to install
+1. Make sure `node_modules/` is present inside `com.gerp93.kvgauge.sdPlugin/` (run `npm install` if not).
+2. Compress the `com.gerp93.kvgauge.sdPlugin` folder as a ZIP archive.
+3. Rename the archive extension from `.zip` to `.streamDeckPlugin`.
+4. Double-click the `.streamDeckPlugin` file — Stream Deck will install it automatically.
 
 ### Development Tips
 
-- **Testing**: While developing, you can place the plugin folder directly in the plugins directory
+- **Testing**: Place the plugin folder directly in the plugins directory while developing.
 - **Debugging**: Check Stream Deck logs at:
   - Windows: `%appdata%\Elgato\StreamDeck\logs\`
   - macOS: `~/Library/Logs/ElgatoStreamDeck/`
-- **Hot Reload**: When making changes, restart the Stream Deck software to reload the plugin
+- **Hot Reload**: After making changes, restart Stream Deck to reload the plugin.
 
 ## Troubleshooting
 
 ### Plugin doesn't appear in Stream Deck
-- Verify the folder is named `com.gerp93.kvgauge.sdPlugin` (case-sensitive)
-- Check that all files are present and properly copied
-- Ensure Node.js is installed and in your system PATH
-- Restart Stream Deck software
+- Verify the folder inside the plugins directory is named exactly `com.gerp93.kvgauge.sdPlugin` (case-sensitive).
+- Confirm that `node_modules/` exists inside the bundle (run `npm install` if missing).
+- Ensure Node.js is installed and in your system PATH.
+- Restart Stream Deck software.
 
 ### Temperature shows "N/A"
-- Temperature sensors may not be available on all systems
-- On some systems, you may need to run Stream Deck with administrator/elevated privileges
-- Virtual machines typically don't have access to temperature sensors
+- Temperature sensors may not be available on all systems.
+- On some systems, you may need to run Stream Deck with administrator/elevated privileges.
+- Virtual machines typically don't have access to temperature sensors.
 
 ### Actions not updating
-- Check Stream Deck logs for errors
-- Verify that `systeminformation` package is properly installed
-- Ensure Node.js is accessible from the command line
+- Check Stream Deck logs for errors.
+- Verify that the `systeminformation` package is properly installed inside the bundle.
+- Ensure Node.js is accessible from the command line.
 
 ### "Cannot find module" errors
-- Run `npm install` in the plugin directory
-- Verify that `node_modules` folder exists and contains `systeminformation`
+- Run `npm install` inside `com.gerp93.kvgauge.sdPlugin/`.
+- Verify that `node_modules/` exists and contains `systeminformation` and `ws`.
 
 ## System Requirements
 
 - **Operating System**: Windows 10+ or macOS 10.14+
 - **Stream Deck Software**: Version 5.0 or higher
 - **Node.js**: Version 14.x or higher
-- **RAM**: Minimal impact (< 50MB)
+- **RAM**: Minimal impact (< 50 MB)
 - **CPU**: Negligible impact (monitoring runs at 2-second intervals)
 
 ## Security Notes
 
-- This plugin uses the `systeminformation` library (v5.23.7) which is regularly updated for security
-- The plugin only reads system metrics - it does not modify system settings
-- All communication stays local between Stream Deck and the plugin (no internet connection required)
+- This plugin uses the `systeminformation` library (v5.x) which is regularly updated for security.
+- The plugin only reads system metrics — it does not modify system settings.
+- All communication stays local between Stream Deck and the plugin (no internet connection required).
 
 ## Future Enhancements
 
@@ -143,3 +135,4 @@ Planned features for future versions:
 - Graphical bar/gauge displays
 - Per-core CPU monitoring
 - Fan speed monitoring
+

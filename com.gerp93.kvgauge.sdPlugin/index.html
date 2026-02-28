@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>KV Gauge Plugin</title>
+</head>
+<body>
+<script>
+  // Stream Deck SDK v2 loads this HTML in its Electron renderer (nodeIntegration
+  // is enabled, so Node.js APIs such as `require` are available to plugin.js).
+  //
+  // plugin.js also contains a CLI-argument fallback at the bottom that calls
+  // process.exit(1) when the required flags are absent.  When running inside
+  // Stream Deck's renderer there are no CLI args, so we intercept process.exit
+  // here to prevent the renderer from closing prematurely.
+  // Stream Deck will call connectElgatoStreamDeckSocket() once this page is
+  // ready, which starts the WebSocket connection to the host application.
+  if (typeof process !== 'undefined' && typeof process.exit === 'function') {
+    const _nativeExit = process.exit.bind(process);
+    process.exit = function (code) {
+      if (code) {
+        // Intentionally suppress non-zero exits that come from plugin.js's
+        // CLI-argument check (the last few lines of that file call
+        // process.exit(1) when the -port/-pluginUUID/etc. flags are absent).
+        // In this browser context those flags are never present; Stream Deck
+        // will invoke connectElgatoStreamDeckSocket() once this page is ready.
+      } else {
+        _nativeExit(code);
+      }
+    };
+  }
+</script>
+<script src="plugin.js"></script>
+</body>
+</html>
