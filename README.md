@@ -41,6 +41,10 @@ Monitor your CPU usage, temperature, and clock speed directly on your Stream Dec
      ```
      ~/Library/Application Support/com.elgato.StreamDeck/Plugins/
      ```
+   - **Linux / Steam Deck**: Copy the `com.gerp93.kvgauge.sdPlugin` folder to:
+     ```
+     ~/.local/share/elgato/StreamDeck/Plugins/
+     ```
 
    The resulting path should look like:
    - Windows: `%appdata%\Elgato\StreamDeck\Plugins\com.gerp93.kvgauge.sdPlugin\`
@@ -73,6 +77,7 @@ You can produce a double-click installer that Stream Deck will import automatica
 
 - Windows 10 or higher
 - macOS 10.14 or higher
+- Linux (including Steam Deck / SteamOS)
 
 ## Notes
 

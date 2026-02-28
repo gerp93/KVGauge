@@ -44,8 +44,16 @@ async function getCPUUsage() {
 async function getCPUTemperature() {
   try {
     const temp = await si.cpuTemperature();
-    if (temp.main && temp.main > 0) {
+    if (temp.main !== null && temp.main > 0) {
       return Math.round(temp.main);
+    }
+    // Fall back to max temperature (common on Linux)
+    if (temp.max !== null && temp.max > 0) {
+      return Math.round(temp.max);
+    }
+    // Fall back to first core temperature
+    if (temp.cores && temp.cores.length > 0 && temp.cores[0] > 0) {
+      return Math.round(temp.cores[0]);
     }
     return null;
   } catch (error) {
@@ -59,8 +67,13 @@ async function getCPUTemperature() {
  */
 async function getCPUClock() {
   try {
+    const currentSpeed = await si.cpuCurrentSpeed();
+    if (currentSpeed.avg && currentSpeed.avg > 0) {
+      return Number(currentSpeed.avg.toFixed(2));
+    }
+    // Fall back to base speed if current speed is unavailable
     const cpuData = await si.cpu();
-    if (cpuData.speed) {
+    if (cpuData.speed != null) {
       return Number(cpuData.speed.toFixed(2));
     }
     return null;
@@ -84,9 +97,7 @@ async function updateDisplay(context, action) {
   switch (action) {
     case ACTIONS.CPU_USAGE:
       value = await getCPUUsage();
-      if (value !== null) {
-        title = `${value}%`;
-      }
+      title = value !== null ? `${value}%` : '--';
       break;
 
     case ACTIONS.CPU_TEMP:
@@ -100,9 +111,7 @@ async function updateDisplay(context, action) {
 
     case ACTIONS.CPU_CLOCK:
       value = await getCPUClock();
-      if (value !== null) {
-        title = `${value} GHz`;
-      }
+      title = value !== null ? `${value} GHz` : '--';
       break;
   }
 

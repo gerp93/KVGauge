@@ -24,6 +24,7 @@
 3. **Locate Your Stream Deck Plugins Folder**
    - **Windows**: `%appdata%\Elgato\StreamDeck\Plugins\`
    - **macOS**: `~/Library/Application Support/com.elgato.StreamDeck/Plugins/`
+   - **Linux / Steam Deck**: `~/.local/share/elgato/StreamDeck/Plugins/`
 
 4. **Copy the Plugin Bundle**
    Copy the entire `com.gerp93.kvgauge.sdPlugin` folder (including `node_modules/`) into the plugins directory.
@@ -112,7 +113,7 @@ com.gerp93.kvgauge.sdPlugin/
 
 ## System Requirements
 
-- **Operating System**: Windows 10+ or macOS 10.14+
+- **Operating System**: Windows 10+, macOS 10.14+, or Linux (including Steam Deck / SteamOS)
 - **Stream Deck Software**: Version 5.0 or higher
 - **Node.js**: Version 14.x or higher
 - **RAM**: Minimal impact (< 50 MB)
