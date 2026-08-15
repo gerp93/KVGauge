@@ -4,6 +4,11 @@ Stream Deck Computer Component Stat Monitor
 
 Monitor your CPU usage, temperature, and clock speed directly on your Stream Deck!
 
+This repo follows the shared conventions in
+[gerp93/KVG_Standards](https://github.com/gerp93/KVG_Standards) (release
+pipeline, licensing, etc.) — see that repo for the org-wide rules this one
+is expected to keep up with.
+
 ## Features
 
 - 📊 **CPU Usage**: Real-time CPU utilization percentage
